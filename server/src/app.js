@@ -489,6 +489,7 @@ app.get('/seed-products', async (req, res) => {
 });
 
 
+
 // Get a single product
 app.get('/products/:id', async (req, res) => {
     try {
