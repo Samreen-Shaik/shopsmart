@@ -1,23 +1,114 @@
-.container{
-    overflow: auto;
-    height: 90vh;
+/* Product Container */
+.product-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-  .details-container{
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+/* Image Styling */
+.image-wrapper {
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.product-image {
+  width: 100%;
+  height: auto;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  transition: transform 0.3s ease;
+}
+
+.product-image:hover {
+  transform: scale(1.05);
+}
+
+/* Details Styling */
+.details-wrapper {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.product-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.product-description {
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.product-price {
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn-buy, .btn-cart {
+  padding: 12px 25px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-buy {
+  background-color: #f39c12;
+  border: none;
+}
+
+.btn-buy:hover {
+  background-color: #e67e22;
+  color: #fff;
+}
+
+.btn-cart {
+  background-color: #3498db;
+  border: none;
+}
+
+.btn-cart:hover {
+  background-color: #2980b9;
+  color: #fff;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .product-container {
+    padding: 10px;
   }
 
-
-  .buttons-container{
-    display: flex;
-    gap: 10px;
+  .product-title {
+    font-size: 2rem;
   }
 
-  .loader-container{
-    height: 90vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .product-price {
+    font-size: 1.5rem;
+  }
+
+  .btn-buy, .btn-cart {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
 }

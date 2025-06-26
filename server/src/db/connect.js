@@ -1,15 +1,13 @@
 const mongoose = require("mongoose");
-// Middleware
-const db = 'mongodb+srv://22pa1a05d4:kqswnHymjYBGJkuC@cluster0.1rjne9p.mongodb.net/shopping?retryWrites=true&w=majority'
 
-// Connect to MongoDB using the connection string
-mongoose.connect(db, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => {
-  console.log(`Connection successful`);
-}).catch((e) => {
-  console.log(`No connection: ${e}`);
-});
+const db = 'mongodb+srv://shopsmart:sam123@cluster0.rnhpuac.mongodb.net/shopsmart?retryWrites=true&w=majority&appName=Cluster0';
 
-// mongodb://localhost:27017
+mongoose.connect(db)
+  .then(() => {
+    console.log("✅ MongoDB connected successfully");
+  })
+  .catch((e) => {
+    console.log("❌ MongoDB connection failed:", e.message);
+  });
+
+module.exports = mongoose; // Export mongoose instance if needed elsewhere

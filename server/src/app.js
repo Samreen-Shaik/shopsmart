@@ -1,8 +1,8 @@
 const express = require("express");
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
 const path = require("path");
 const app = express();
-const cors = require('cors')
+const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5100;
 const mongoose = require('mongoose');
@@ -14,7 +14,7 @@ const models = require("./models/schema");
 // app.use(bodyParser.json());
 app.use(cors());
 
-// admin middelware
+// admin middleware
 function adminAuthenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -30,22 +30,20 @@ function adminAuthenticateToken(req, res, next) {
 const userAuthenticateToken = async (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
-        const token = authHeader.split(" ")[1]
+        const token = authHeader && authHeader.split(" ")[1];
         if (!token) {
             res.status(401);
             return res.send('Invalid JWT Token');
         }
-        const decoded = jwt.verify(token, 'USER_SECRET_TOKEN')
+        const decoded = jwt.verify(token, 'USER_SECRET_TOKEN');
         req.user = decoded.user;
         next();
-
     } catch (err) {
         console.error(err);
         res.status(500);
         res.send('Server Error');
     }
 };
-
 
 // API endpoint to add a category
 app.post('/add-category', async (req, res) => {
@@ -73,14 +71,13 @@ app.post('/add-category', async (req, res) => {
 
 app.get('/api/categories', async (req, res) => {
     try {
-        const cotegoriesList = await models.Category.find();
-        res.status(200).send(cotegoriesList);
+        const categoriesList = await models.Category.find();
+        res.status(200).send(categoriesList);
     } catch (error) {
         res.status(500).send('Server error');
         console.log(error);
     }
-})
-
+});
 
 // Add a new product to the database and associate it with an existing category
 app.post('/add-products', async (req, res) => {
@@ -103,12 +100,11 @@ app.post('/add-products', async (req, res) => {
             category,
             countInStock,
             rating,
-            quantity,
+            quantity: quantity || 1,
             dateCreated: new Date()
         });
 
         await product.save();
-
         res.status(201).send(product);
     } catch (error) {
         console.log(error);
@@ -116,11 +112,10 @@ app.post('/add-products', async (req, res) => {
     }
 });
 
-
 // Endpoint for adding an item to the cart
 app.post('/add-to-cart', async (req, res) => {
-    const {userId, productId, productName, quantity = 1 } = req.body;
-    const item = new models.AddToCart({userId, productId,productName, quantity });
+    const { userId, productId, productName, quantity = 1 } = req.body;
+    const item = new models.AddToCart({ userId, productId, productName, quantity });
     try {
         await item.save();
         res.status(200).json({ message: `Added ${quantity} of product ${productId} to cart` });
@@ -129,7 +124,6 @@ app.post('/add-to-cart', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-
 
 app.delete('/remove-from-cart/:id', async (req, res) => {
     const id = req.params.id;
@@ -146,8 +140,6 @@ app.delete('/remove-from-cart/:id', async (req, res) => {
     }
 });
 
-
-
 app.get('/cart/:id', async (req, res) => {
     try {
         const cartItems = await models.AddToCart.find({ userId: req.params.id });
@@ -159,7 +151,6 @@ app.get('/cart/:id', async (req, res) => {
         res.status(500).send('Internal server error');
     }
 });
-
 
 app.post('/orders', async (req, res) => {
     const { firstname, lastname, user, phone, productId, quantity, paymentMethod, address } = req.body;
@@ -173,7 +164,7 @@ app.post('/orders', async (req, res) => {
             price: amount,
             phone,
             productId,
-            productName:product.productname,
+            productName: product.productname,
             quantity,
             paymentMethod,
             address
@@ -181,8 +172,8 @@ app.post('/orders', async (req, res) => {
         const newOrder = await order.save();
         const payment = new models.Payment({
             user,
-            name:firstname+ " " +lastname,
-            order: newOrder._id, // Associate the order with the payment
+            name: firstname + " " + lastname,
+            order: newOrder._id,
             amount,
             deliveryStatus: newOrder.status,
             paymentMethod,
@@ -205,8 +196,6 @@ app.get('/payments', async (req, res) => {
     }
 });
 
-
-
 app.get('/orders', async (req, res) => {
     try {
         const order = await models.Order.find();
@@ -219,7 +208,6 @@ app.get('/orders', async (req, res) => {
     }
 });
 
-// Define a route for fetching orders by user ID
 app.get('/my-orders/:id', async (req, res) => {
     const userId = req.params.id;
     try {
@@ -243,20 +231,20 @@ app.put('/orders/:id', async (req, res) => {
             return res.status(404).send('Order not found');
         }
 
-        order.status = status; // Update the order status property
-        order.createdAt = Date.now()
+        order.status = status;
+        order.createdAt = Date.now();
         const payment = await models.Payment.findOne({ order: orderId });
         if (!payment) {
             return res.status(404).send('Payment not found');
         }
 
-        payment.deliveryStatus = status; // Update the payment status property
-        if(status === 'Delivered'){
-            payment.status = 'Success'
-        }else{
-            payment.status = "Pending"
+        payment.deliveryStatus = status;
+        if (status === 'Delivered') {
+            payment.status = 'Success';
+        } else {
+            payment.status = 'Pending';
         }
-        payment.createdAt = Date.now()
+        payment.createdAt = Date.now();
 
         await payment.save();
         const updatedOrder = await order.save();
@@ -266,7 +254,6 @@ app.put('/orders/:id', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 
 app.put('/cancel-order/:id', async (req, res) => {
     try {
@@ -274,21 +261,19 @@ app.put('/cancel-order/:id', async (req, res) => {
         const { status } = req.body;
 
         const order = await models.Order.findById(orderId);
-        console.log(order)
         if (!order) {
             return res.status(404).send('Order not found');
         }
 
-        order.status = status; 
+        order.status = status;
         const payment = await models.Payment.findOne({ order: orderId });
         if (!payment) {
             return res.status(404).send('Payment not found');
         }
 
         payment.deliveryStatus = status;
-        payment.status = "Failed"
-        payment.createdAt = Date.now()
-        
+        payment.status = 'Failed';
+        payment.createdAt = Date.now();
 
         await payment.save();
         const updatedOrder = await order.save();
@@ -298,7 +283,6 @@ app.put('/cancel-order/:id', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 
 app.get('/orders/:id', async (req, res) => {
     try {
@@ -312,8 +296,6 @@ app.get('/orders/:id', async (req, res) => {
     }
 });
 
-
-// POST /payments
 app.post('/payments', async (req, res) => {
     try {
         const payment = new models.Payment(req.body);
@@ -325,13 +307,9 @@ app.post('/payments', async (req, res) => {
     }
 });
 
-// Manage payment (admin only)
-// Define the route for updating a payment
 app.put('/payment/:id', async (req, res) => {
-    console.log(req.body);
     try {
         const paymentId = req.params.id;
-
         const payment = await models.Payment.findById(paymentId);
         if (!payment) {
             return res.status(404).send('Payment not found');
@@ -361,9 +339,6 @@ app.put('/payment/:id', async (req, res) => {
     }
 });
 
-// feedback schema
-
-// Create feedback from user
 app.post('/feedback', async (req, res) => {
     try {
         const { user, message } = req.body;
@@ -375,7 +350,6 @@ app.post('/feedback', async (req, res) => {
     }
 });
 
-// Check feedback (admin only)
 app.get('/feedback', async (req, res) => {
     try {
         const feedback = await models.Feedback.find();
@@ -386,20 +360,18 @@ app.get('/feedback', async (req, res) => {
     }
 });
 
-// admin schema
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     const user = await models.Users.findOne({ email });
     if (!user) {
         return res.status(401).json({ message: 'Invalid email or password' });
     }
-    const isAdmin = email == 'virat@gmail.com' && password == 'virat@1234';
+    const isAdmin = email === 'virat@gmail.com' && password === 'virat@1234';
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
         return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Generate a JWT token
     if (!isAdmin) {
         const token = jwt.sign({ userId: user._id }, 'mysecretkey');
         res.json({ user, token });
@@ -409,7 +381,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// user schema
 app.post('/register', async (req, res) => {
     try {
         const { firstname, lastname, username, email, password } = req.body;
@@ -421,7 +392,6 @@ app.post('/register', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Create a new user object
         const newUser = new models.Users({
             firstname,
             lastname,
@@ -430,7 +400,6 @@ app.post('/register', async (req, res) => {
             password: hashedPassword
         });
 
-        // Save the new user to the database
         const userCreated = await newUser.save();
         console.log(userCreated, 'user created');
         return res.status(201).send('Successfully Registered');
@@ -440,8 +409,6 @@ app.post('/register', async (req, res) => {
     }
 });
 
-
-// get users
 app.get('/users', async (req, res) => {
     try {
         const users = await models.Users.find();
@@ -452,9 +419,6 @@ app.get('/users', async (req, res) => {
     }
 });
 
-
-// Get Products
-// Define a function to query the database for all products
 const getAllProducts = async () => {
     try {
         const products = await models.Product.find();
@@ -465,32 +429,40 @@ const getAllProducts = async () => {
     }
 };
 
-// Define a route for the "get products" API endpoint
 app.get('/products', async (req, res) => {
     const products = await getAllProducts();
     res.json(products);
 });
+
 app.get('/seed-products', async (req, res) => {
-  const sample = [
-    {
-      productname: 'iPhone 13',
-      description: 'Latest Apple smartphone',
-      price: 79999,
-      brand: 'Apple',
-      image: 'https://image.url',
-      category: 'Mobile',
-      countInStock: 50,
-      rating: 4.5,
-      quantity: 1
-    }
-  ];
-  await models.Product.insertMany(sample);
-  res.send('Seeded!');
+    const sample = [
+        {
+            productname: 'iPhone 13',
+            description: 'Latest Apple smartphone',
+            price: 79999,
+            brand: 'Apple',
+            image: 'https://image.url',
+            category: 'Mobile',
+            countInStock: 50,
+            rating: 4.5,
+            quantity: 1
+        },
+        {
+            productname: 'Laptop Pro',
+            description: 'High-performance laptop',
+            price: 120000,
+            brand: 'Dell',
+            image: 'https://example.com/laptop.jpg',
+            category: 'Electronics',
+            countInStock: 30,
+            rating: 4.7,
+            quantity: 1
+        }
+    ];
+    await models.Product.insertMany(sample);
+    res.send('Seeded!');
 });
 
-
-
-// Get a single product
 app.get('/products/:id', async (req, res) => {
     try {
         const product = await models.Product.findById(req.params.id);
@@ -517,7 +489,6 @@ app.delete('/products/:id', async (req, res) => {
     }
 });
 
-
 app.put('/products/:id', async (req, res) => {
     try {
         const updatedProduct = await models.Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -534,6 +505,5 @@ app.put('/products/:id', async (req, res) => {
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
-
 
 module.exports = app;
